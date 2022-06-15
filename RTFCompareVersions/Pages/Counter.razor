@@ -1,0 +1,64 @@
+﻿@page "/counter"
+@using Aspose.Words;
+
+
+<PageTitle>Versioning</PageTitle>
+
+<h1>Versioning</h1>
+<labal>Path 1</labal>
+<input h type="text" @bind="@path1" @oninput="OnInputEventP1" />
+<labal>Path 2</labal>
+<input type="text" @bind="@path2" @oninput="OnInputEventP2" />
+
+<button class="btn btn-primary" @onclick="CompareVersions">Compare RTF Versions</button>
+
+@code {
+
+    private string path1 { get; set; } // path of first RTF document
+    private string path2 { get; set; } // path of second RTF document
+    private void OnInputEventP1(ChangeEventArgs changeEvent)
+    {
+        path1 = (string)changeEvent.Value;
+    }
+    private void OnInputEventP2(ChangeEventArgs changeEvent)
+    {
+        path2 = (string)changeEvent.Value;
+    }
+    private  void CompareVersions()
+    {
+
+        int added = 0;
+        int deleted = 0;
+        
+        FileStream fs1 = new FileStream(@path1 , FileMode.Open);
+        FileStream fs2 = new FileStream(@path2, FileMode.Open);
+
+        Document doc1 =  new Document(fs1);
+        Document doc2 = new Document(fs2);
+        Document docComp = new Document(fs1);
+
+        DocumentBuilder builder = new DocumentBuilder(docComp);
+        doc1.Compare(doc2, "a", DateTime.Now);
+
+        foreach (Revision revision in doc1.Revisions)
+        {
+
+            switch (revision.RevisionType)
+            {
+
+                case RevisionType.Insertion:
+                    added++;
+                    break;
+
+                case RevisionType.Deletion:
+                    deleted++;
+                    break;
+
+            }
+        }
+
+        doc1.Save("doc.rtf");
+        
+    }
+   
+}
